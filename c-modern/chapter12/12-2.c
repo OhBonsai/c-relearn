@@ -16,13 +16,16 @@ void reserve_words(const char *a, char *b) {
 
 
 int main(void) {
-	char *a, *b;
+	char *a;
+	char b[100] = "";
 	_Bool yes = true;
 
 	printf("ENTER MESSAGE: ");
 	scanf("%s", a);
+	strcpy(b, a);
 
 	int len = strlen(a);
+	reserve_words(a, b);
 
 	for(int i=0; i<len ;i++) {
 		if ( *(a+i) != *(b+i)) {
