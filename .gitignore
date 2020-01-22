@@ -1,2 +1,7 @@
 a.out
+c.sh
 a.out*
+
+
+.idea
+cmake-build-debug
