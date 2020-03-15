@@ -110,10 +110,33 @@ typedef void (dictScanFunction) (void *privdata, const dictEntry *de);
 dict *dictCreate(dictType *type, void *privDataPtr);
 int dictExpand(dict *d, unsigned long size);
 int dictAdd(dict *d, void *key, void *val);
-
-
 dictEntry *dictAddRaw(dict *d, void *key);
 int dictReplace(dict *d, void *key, void *val);
+dictEntry *dictReplaceRaw(dict *d, void *key);
+int dictDelete(dict *d, const void *key);
+int dictDeleteNoFree(dict *d, const void *key);
+void dictRelease(dict *d);
+dictEntry * dictFind(dict *d, const void *key);
+void *dictFetchValue(dict *d, const void *key);
+int dictResize(dict *d);
+dictIterator *dictGetIterator(dict *d);
+dictIterator *dictGetSafeIterator(dict *d);
+dictEntry *dictNext(dictIterator *iter);
+void dictReleaseIterator(dictIterator *iter);
+dictEntry *dictGetRandomKey(dict *d);
+int dictGetRandomKeys(dict *d, dictEntry **des, int count);
+void dictPrintStats(dict *d);
+unsigned int dictGenHashFunction(const void *key, int len);
+unsigned int dictGenCaseHashFunction(const unsigned char *buf, int len);
+void dictEmpty(dict *d, void(callback)(void*));
+void dictEnableResize(void);
+void dictDisableResize(void);
+int dictRehash(dict *d, int n);
+int dictRehashMilliseconds(dict *d, int ms);
+void dictSetHashFunctionSeed(unsigned int initval);
+unsigned int dictGetHashFunctionSeed(void);
+unsigned long dictScan(dict *d, unsigned long v, dictScanFunction *fn, void *privdata);
+
 
 
 #endif //REDIS_LEARN_DICT_H
