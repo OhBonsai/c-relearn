@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "intset.h"
 #include "zmalloc.h"
 
@@ -130,8 +131,102 @@ static intset *intsetUpgradeAndAdd(intset *is, int64_t value) {
     return is;
 }
 
+static void intsetMoveTail(intset *is, uint32_t from, uint32_t to) {
+
+    void *src, *dst;
+
+    uint32_t bytes = is->length - from;
+
+    uint32_t encoding = is->encoding;
+
+    if (encoding == INTSET_ENC_INT64) {
+        src = (int64_t*)is->contents+from;
+        dst = (int64_t*)is->contents+to;
+        bytes *= sizeof(int64_t);
+    } else if (encoding == INTSET_ENC_INT32) {
+        src = (int32_t*)is->contents+from;
+        dst = (int32_t*)is->contents+to;
+        bytes *= sizeof(int32_t);
+    } else {
+        src = (int16_t*)is->contents+from;
+        dst = (int16_t*)is->contents+to;
+        bytes *= sizeof(int16_t);
+    }
+
+    memmove(dst, src, bytes);
+}
 
 
+intset *intsetAdd(intset *is, int64_t value, uint8_t *success) {
+    uint8_t valenc = _intsetValueEncoding(value);
+    uint32_t pos;
+
+    if (success) *success = 1;
+
+    if (valenc > is->encoding) {
+        return intsetUpgradeAndAdd(is, value);
+    } else {
+        if (intsetSearch(is, value, &pos)) {
+            if(success) *success =0;
+            return is;
+        }
+
+        is = intsetResize(is, is->length+1);
+        if (pos < is->length) intsetMoveTail(is, pos, pos+1);
+    }
+
+    _intsetSet(is, pos, value);
+
+    is->length = is->length + 1;
+    return is;
+}
 
 
+intset *intsetRemove(intset *is, int64_t value, int *success) {
+    uint8_t valuenc = _intsetValueEncoding(value);
+    uint32_t pos;
 
+    if (success) *success =0;
+
+    if (valuenc <= is->encoding && intsetSearch(is, value, &pos)) {
+        uint32_t len = is->length;
+        if (success) *success =1;
+
+        if (pos < (len-1)) intsetMoveTail(is, pos+1, pos);
+        is = intsetResize(is, len-1);
+        is->length = len -1;
+    }
+
+    return is;
+}
+
+uint8_t intsetFind(intset *is, int64_t value) {
+
+    uint8_t valuenc = _intsetValueEncoding(value);
+
+    return valuenc <= is->encoding && intsetSearch(is, value, NULL);
+}
+
+
+int64_t intsetRandom(intset *is) {
+    return _intsetGet(is, rand() % is->length);
+}
+
+
+uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value) {
+    if (pos < is->length) {
+        *value = _intsetGet(is, pos);
+        return 1;
+    }
+    return 0;
+}
+
+
+uint32_t intsetLen(intset *is) {
+    return is->length;
+}
+
+
+size_t intsetBlobLen(intset *is) {
+   return sizeof(intset) + is->length * is->encoding;
+}
