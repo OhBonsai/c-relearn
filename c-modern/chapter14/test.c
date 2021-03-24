@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
     println2(str);
 
 
+
     printf("%.2f\n", float_max(2.0, 3.0));
 
 #if defined(DEBUG)
