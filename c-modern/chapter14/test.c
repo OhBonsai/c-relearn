@@ -17,6 +17,10 @@ type type##_max(type x, type y) \
 
 GENERIC_MAX(float)
 
+
+
+
+
 int main(int argc, char **argv) {
     println("abc");
     println2("abc");
