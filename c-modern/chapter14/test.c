@@ -23,7 +23,10 @@ GENERIC_MAX(float)
 
 int main(int argc, char **argv) {
     println("abc");
-    println2("abc");
+
+
+
+
     char *str = "bcd";
 
     println2(str);
